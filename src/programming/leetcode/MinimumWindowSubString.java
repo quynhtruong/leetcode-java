@@ -1,5 +1,9 @@
 package programming.leetcode;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by quuynh on 29/06/17.
  */

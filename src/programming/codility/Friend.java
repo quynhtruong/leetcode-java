@@ -2,6 +2,7 @@ package programming.codility;
 
 import java.util.*;
 
+
 public class Friend {
     private Collection<Friend> friends;
     private String email;
@@ -57,6 +58,6 @@ public class Friend {
         b.addFriendship(c);
         b.addFriendship(d);
 
-        System.out.println(a.canBeConnected(e));
+        System.out.println(a.canBeConnected(b));
     }
 }

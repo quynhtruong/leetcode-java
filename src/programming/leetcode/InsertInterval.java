@@ -1,6 +1,7 @@
 package programming.leetcode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,22 +10,22 @@ import java.util.List;
 public class InsertInterval {
     public List<Interval> insert(List<Interval> intervals, Interval newInterval) {
         intervals.add(newInterval);
-        int newIndex = intervals.size() - 1;
-        while (newIndex > 0 && intervals.get(newIndex).start <= intervals.get(newIndex - 1).start) {
-            Interval temp = intervals.get(newIndex);
-            intervals.set(newIndex, intervals.get(newIndex - 1));
-            intervals.set(newIndex - 1, temp);
-            newIndex--;
+        int n = intervals.size();
+        int index = n - 1;
+        while(index > 0 && intervals.get(index).start < intervals.get(index - 1).start) {
+            Collections.swap(intervals, index - 1, index);
+            index--;
         }
         List<Interval> result = new ArrayList<>();
         result.add(intervals.get(0));
-        for (int i = 1; i < intervals.size(); i++) {
-            Interval interval = intervals.get(i);
-            Interval currentTop = result.get(result.size() - 1);
-            if (interval.start <= currentTop.end)
-                currentTop.end = Math.max(currentTop.end, interval.end);
-            else result.add(interval);
-        }
+        for(int i = 1; i < n; i++) {
+            if (intervals.get(i).start > result.get(result.size() - 1).end) {
+                result.add(intervals.get(i));
+            } else {
+                int maxEnd = Math.max(result.get(result.size() - 1).end, intervals.get(i).end);
+                result.get(result.size() - 1).end = maxEnd;
+            }
+        }//end for i
         return result;
     }
 

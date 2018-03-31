@@ -9,15 +9,14 @@ import java.util.List;
  * Created by quuynh on 16/06/17.
  */
 
-class IntervalComparator implements Comparator<Interval> {
-    public int compare(Interval i1, Interval i2) {
-        return i1.start - i2.start;
-    }
-}
 
 public class MergeIntervals {
     public List<Interval> merge(List<Interval> intervals) {
-        Collections.sort(intervals, new IntervalComparator());
+        Collections.sort(intervals, new Comparator<Interval>() {
+            public int compare(Interval i1, Interval i2) {
+                return Integer.compare(i1.start, i2.start);
+            }
+        });
         List<Interval> result = new ArrayList<Interval>();
         if (intervals.isEmpty()) return result;
         result.add(intervals.get(0));
@@ -29,5 +28,4 @@ public class MergeIntervals {
         }
         return result;
     }
-
 }

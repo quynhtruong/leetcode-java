@@ -1,107 +1,80 @@
 package programming.leetcode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by quuynh on 17/07/17.
  */
-class LFUCacheNode implements Comparable<LFUCacheNode> {
-    public int key, value, count, time;
-
-    public LFUCacheNode(int key, int value, int time) {
-        this.key = key;
-        this.value = value;
-        this.count = 1;
-        this.time = time;
-    }
-
-    @Override
-    public int compareTo(LFUCacheNode that) {
-        if (this.count < that.count) return -1;
-        if (this.count > that.count) return 1;
-        return Integer.compare(this.time, that.time);
-    }
-}
 
 public class LFUCache {
-    private int capacity, timeStamp = 0, nNode = 0;
-    private LFUCacheNode[] heap;
-    private Map<Integer, Integer> posMap = new HashMap<>();
+    public Map<Integer, Integer> cache;
+    public TreeMap<Integer, LinkedHashSet<Integer>> countKeyMap;
+    public Map<Integer, Integer> keyCountMap;
+    public int capacity;
 
     public LFUCache(int capacity) {
         this.capacity = capacity;
-        this.heap = new LFUCacheNode[capacity + 2];
-        this.posMap = new HashMap<>();
-    }
-
-    private void swap(int pos, int i, LFUCacheNode[] heap) {
-        LFUCacheNode temp = heap[pos];
-        heap[pos] = heap[i];
-        heap[i] = temp;
-        posMap.put(heap[pos].key, pos);
-        posMap.put(heap[i].key, i);
-    }
-
-    private void upHeap(int pos, LFUCacheNode[] heap) {
-        while (pos > 1) {
-            int i = pos >> 1;
-            if (heap[pos].compareTo(heap[i]) > 0) return;
-            swap(pos, i, heap);
-            pos = i;
-        }
-    }
-
-    private void downHeap(int pos, LFUCacheNode[] heap, int nNode) {
-        while ((pos << 1) <= nNode) {
-            int i = pos << 1;
-            if (i < nNode && heap[i].compareTo(heap[i + 1]) > 0) i++;
-            if (heap[pos].compareTo(heap[i]) < 0) return;
-            swap(pos, i, heap);
-            pos = i;
-        }
+        cache = new HashMap<>();
+        keyCountMap = new HashMap<>();
+        countKeyMap = new TreeMap<>();
     }
 
     public int get(int key) {
-        Integer pos = posMap.get(key);
-        if (pos == null) return -1;
-        Integer result = heap[pos].value;
-        timeStamp++;
-        heap[pos].time = timeStamp;
-        heap[pos].count++;
-        downHeap(pos, heap, nNode);
-        return result;
+        Integer result = cache.get(key);
+        if (result == null) {
+            return -1;
+        } else {
+            increaseCount(key);
+            return result;
+        }
     }
 
+    private void increaseCount(int key) {
+        Integer count = keyCountMap.get(key);
+        countKeyMap.get(count).remove(key);
+        if (countKeyMap.get(count).isEmpty()) countKeyMap.remove(count);
+        count++;
+        if (countKeyMap.get(count) == null) countKeyMap.put(count, new LinkedHashSet<>());
+        countKeyMap.get(count).add(key);
+        keyCountMap.put(key, count);
+    }
 
     public void put(int key, int value) {
-        if (capacity == 0) return;
-        timeStamp++;
-        Integer pos = posMap.get(key);
-        if (pos != null) {
-            heap[pos].value = value;
-            heap[pos].time = timeStamp;
-            heap[pos].count++;
-            downHeap(pos, heap, nNode);
-        } else {
-            if (nNode == capacity) {
-                swap(1, nNode, heap);
-                posMap.remove(heap[nNode].key);
-                nNode--;
-                downHeap(1, heap, nNode);
+        if (cache.get(key) != null) {
+            cache.put(key, value);
+            increaseCount(key);
+        } else if (capacity > 0){
+            if (cache.size() == capacity) { //remove
+                Integer minCount = countKeyMap.firstKey();
+                Integer removedKey = countKeyMap.get(minCount).iterator().next();
+                keyCountMap.remove(removedKey);
+                cache.remove(removedKey);
+                countKeyMap.get(minCount).remove(removedKey);
+                if (countKeyMap.get(minCount).isEmpty()) {
+                    //System.out.println("Remove all "+ minCount);
+                    countKeyMap.remove(minCount);
+                }
             }
-            nNode++;
-            heap[nNode] = new LFUCacheNode(key, value, timeStamp);
-            posMap.put(key, nNode);
-            upHeap(nNode, heap);
+            cache.put(key, value);
+            keyCountMap.put(key, 1);
+            LinkedHashSet set = countKeyMap.get(1) != null ? countKeyMap.get(1) : new LinkedHashSet<>();
+            set.add(key);
+            countKeyMap.put(1, set);
         }
     }
 
     public static void main(String[] args) {
-        LFUCache cache = new LFUCache(0);
-        cache.put(0, 0);
-        System.out.println(cache.get(0));
+        LFUCache cache = new LFUCache(2);
+        cache.put(1,1);
+        cache.put(2,2);
+        System.out.println(cache.get(1));
+        cache.put(3,3);
+        System.out.println(cache.get(2));
+        System.out.println(cache.get(3));
+        cache.put(4,4);
+        System.out.println(cache.get(1));
+        System.out.println(cache.get(3));
+        System.out.println(cache.get(4));
     }
 }
+

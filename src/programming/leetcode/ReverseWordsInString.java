@@ -5,36 +5,37 @@ import java.util.List;
 
 public class ReverseWordsInString {
     public String reverseWords(String s) {
-        s = s.trim();
+        s = ' ' + s + ' ';
+        int n = s.length();
+        char[] arr = s.toCharArray();
+        reverse(arr, 0, n - 1);
+        int start = 0;
+        for(int i = 1; i < n; i++) if (arr[i] == ' ') {
+            reverse(arr, start, i - 1);
+            start = i + 1;
+        }
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < s.length(); i++) {
-            if (sb.length() == 0 || (sb.charAt(sb.length() - 1) != ' ' && s.charAt(i) == ' ')
-                    || (s.charAt(i) != ' ')) {
-                sb.append(s.charAt(i));
+        for(int i = 0; i < n; i++) {
+            if (arr[i] != ' ' || sb.length() == 0 || sb.charAt(sb.length() - 1) != ' ') {
+                sb.append(arr[i]);
             }
         }
-        int n = sb.length();
-        if (n == 0) return s;
-        char[] arr = sb.toString().toCharArray();
-        reverse(arr, 0, n - 1);
-        int first = 0, last = 0;
-        while (first < n) {
-            while (last < n && arr[last] != ' ') last++;
-            reverse(arr, first, last - 1);
-            first = last + 1;
-            last = first;
-        }
-        return String.valueOf(arr);
+        return sb.toString().trim();
     }
 
-    public void reverse(char[] arr, int start, int end) {
-        while (start < end) {
-            char temp = arr[start];
+    private void reverse(char[] arr, int start, int end) {
+        while(start < end) {
+            char ch = arr[start];
             arr[start] = arr[end];
-            arr[end] = temp;
+            arr[end] = ch;
             start++;
             end--;
         }
+    }
+
+    public static void main(String[] args) {
+        ReverseWordsInString solution = new ReverseWordsInString();
+        System.out.println(solution.reverseWords("the sky is blue"));
     }
 }
 

@@ -1,21 +1,19 @@
 package programming.leetcode;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 public class SkyLineProblem {
-    class Interval implements Comparable<Interval> {
+    /*
+    class Range implements Comparable<Range> {
         public int x, y, type;
 
-        public Interval(int x, int y, int type) {
+        public Range(int x, int y, int type) {
             this.x = x;
             this.y = y;
             this.type = type;
         }
 
-        public int compareTo(Interval that) {
+        public int compareTo(Range that) {
             int xCompare = Integer.compare(this.x, that.x);
             if (xCompare != 0) return xCompare;
             return Integer.compare(this.type, that.type);
@@ -30,14 +28,14 @@ public class SkyLineProblem {
     public List<int[]> getSkyline(int[][] buildings) {
         List<int[]> result = new ArrayList<>();
         if (buildings.length == 0) return result;
-        List<Interval> intervalList = new ArrayList<>();
+        List<Range> intervalList = new ArrayList<>();
         for (int[] rectangle: buildings) {
-            intervalList.add(new Interval(rectangle[0], rectangle[2], 1));
-            intervalList.add(new Interval(rectangle[1], rectangle[2], 2));
+            intervalList.add(new Range(rectangle[0], rectangle[2], 1));
+            intervalList.add(new Range(rectangle[1], rectangle[2], 2));
         }
         Collections.sort(intervalList);
         TreeMap<Integer, Integer> topMap = new TreeMap<>();
-        for (Interval interval : intervalList) {
+        for (Range interval : intervalList) {
             if (interval.type == 1) {
                 if (topMap.isEmpty()) {
                     result.add(new int[]{interval.x, interval.y});
@@ -60,5 +58,55 @@ public class SkyLineProblem {
         }
         return result;
     }
+    */
+
+    class Interval {
+        public int x,y,type;
+        public Interval(int x, int y, int type) {
+            this.x = x; this.y = y; this.type = type;
+        }
+    }
+    public void add(List<int[]> result, int[] element) {
+        while(!result.isEmpty() && result.get(result.size() - 1)[0] == element[0]) {
+            result.remove(result.size() - 1);
+        }
+        result.add(element);
+    }
+    public List<int[]> getSkyline(int[][] buildings) {
+        List<Interval> intervals = new ArrayList<>();
+        for(int[] building: buildings) {
+            intervals.add(new Interval(building[0], building[2], 1));
+            intervals.add(new Interval(building[1], building[2], 2));
+        }
+        Collections.sort(intervals, new Comparator<Interval>(){
+            public int compare(Interval i1, Interval i2) {
+                if (Integer.compare(i1.x, i2.x) != 0) return Integer.compare(i1.x, i2.x);
+                if (Integer.compare(i1.type, i2.type) != 0) return Integer.compare(i1.type, i2.type);
+                return Integer.compare(i2.y, i1.y);
+            }
+        });
+        TreeMap<Integer, Integer> countMap  = new TreeMap<>();
+        countMap.put(0, 1);
+        List<int[]> result = new ArrayList<>();
+        for(Interval interval: intervals) {
+            int x = interval.x;
+            int y = interval.y;
+            if (interval.type == 1) {
+                if (y > countMap.lastKey()) {
+                    add(result, new int[]{x, y});
+                }
+                countMap.put(y, countMap.get(y) == null ? 1: countMap.get(y) + 1);
+            } else {
+                int count = countMap.get(y);
+                if (count > 1) countMap.put(y, count - 1);
+                else countMap.remove(y);
+                if (y > countMap.lastKey()) {
+                    add(result, new int[]{x, countMap.lastKey()});
+                }
+            }
+        }//end for i
+        return result;
+    }
+
 }
 

@@ -4,6 +4,45 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 public class BasicCalculatorII {
+
+    public int calculate(String s) {
+        s = s +" ";
+        int n  = s.length();
+        Deque<String> stack = new LinkedList<>();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            if (ch == ' ' || ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+                if (sb.length() > 0) {
+                    int element = Integer.parseInt(sb.toString());
+                    if (!stack.isEmpty() && ("*".equals(stack.peekLast()) || "/".equals(stack.peekLast()))) {
+                        String operator = stack.removeLast();
+                        int preElement = Integer.parseInt(stack.removeLast());
+                        if ("*".equals(operator)) element = preElement * element;
+                        if ("/".equals(operator)) element = preElement / element;
+                    }
+                    stack.addLast(String.valueOf(element));
+                    sb = new StringBuilder();
+                }
+                if (ch != ' ') stack.addLast(s.substring(i, i + 1));
+            } else {
+                sb.append(ch);
+            }
+        }//end for i
+        int result = 0;
+        while(!stack.isEmpty()) {
+            int operand = Integer.parseInt(stack.removeLast());
+            String operator = "+";
+            if (!stack.isEmpty()) {
+                operator = stack.removeLast();
+            }
+            if ("+".equals(operator)) result += operand;
+            if ("-".equals(operator)) result -= operand;
+        }
+        return result;
+    }
+
+    /*
     public int calculate(String s) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
@@ -49,5 +88,5 @@ public class BasicCalculatorII {
         }
         return result;
     }
-
+        */
 }
